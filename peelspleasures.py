@@ -4,12 +4,14 @@ import urllib
 import random
 import collections
 import psycopg2
+from apiclient.discovery import build
 
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 ACCESS_SECRET = os.environ['ACCESS_SECRET']
 DB_URL = os.environ['DATABASE_URL']
+YT_KEY = os.environ['YT_KEY']
 
 class Track(collections.namedtuple(
         "Track",
@@ -39,16 +41,31 @@ def pop_track():
             track_data = cursor.fetchone()
             cursor.execute("UPDATE tracks SET played = TRUE WHERE id = %(id)s",
                            {'id': track_data[0]})
-            conn.commit()
     return Track(*track_data)
+
+def get_track_video(track):
+    s = build("youtube", "v3", developerKey=YT_KEY)
+    query = "{artist} {title}".format(artist=track.artist, title=track.title)
+    request = s.search().list(part='snippet', q=query)
+    response = request.execute()
+    if all(w in response['items'][0]['snippet']['title'].upper() for w in query.upper().split()):
+        return "http://youtu.be/{}".format(response['items'][0]['id']['videoId'])
+    else:
+        return None
 
 def tweet_track():
     track = pop_track()
-    print(track)
+    video = get_track_video(track)
+    if video:
+        status = "{track} {video}".format(track=str(track), video=video)
+    else:
+        status = str(track)
+    print(status)
+
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
     api = tweepy.API(auth)
-    api.update_status(str(track))
+    api.update_status(status)
 
 if __name__ == "__main__":
     import sys
