@@ -48,7 +48,7 @@ def get_track_video(track):
     query = "{artist} {title}".format(artist=track.artist, title=track.title)
     request = s.search().list(part='snippet', q=query)
     response = request.execute()
-    if all(w in response['items'][0]['snippet']['title'].upper() for w in query.upper().split()):
+    if response['items'] and all(w in response['items'][0]['snippet']['title'].upper() for w in query.upper().split()):
         return "http://youtu.be/{}".format(response['items'][0]['id']['videoId'])
     else:
         return None
