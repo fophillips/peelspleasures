@@ -4,7 +4,7 @@ import urllib
 import random
 import collections
 import psycopg2
-from apiclient.discovery import build
+from googleapiclient.discovery import build
 
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
@@ -65,7 +65,7 @@ def tweet_track():
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
     api = tweepy.API(auth)
-    api.update_status(status)
+    #api.update_status(status)
 
 if __name__ == "__main__":
     import sys
