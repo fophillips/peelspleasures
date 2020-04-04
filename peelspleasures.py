@@ -36,6 +36,7 @@ def pop_track():
         with conn.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM tracks WHERE NOT played")
             tracks_left = cursor.fetchone()[0]
+            print(f"tracks_left={tracks_left}")
             track_row = random.randint(0, tracks_left)
             cursor.execute("SELECT id, artist, title, label, date FROM tracks WHERE NOT played OFFSET %(n)s LIMIT 1", {"n": track_row})
             track_data = cursor.fetchone()
